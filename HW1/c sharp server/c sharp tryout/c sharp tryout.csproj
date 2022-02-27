@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>c_sharp_server</RootNamespace>
+    <StartupObject>c_sharp_server.Program</StartupObject>
+    <AssemblyName>c sharp server</AssemblyName>
+  </PropertyGroup>
+
+</Project>

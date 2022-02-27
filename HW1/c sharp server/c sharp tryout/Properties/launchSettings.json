@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "c sharp tryout": {
+      "commandName": "Project",
+      "commandLineArgs": "127.0.0.1 13000 tcp"
+    }
+  }
+}
