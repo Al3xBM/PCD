@@ -42,7 +42,7 @@ namespace c_sharp_client
             while (!verificationPassed)
             {
                 Console.WriteLine("Please type yes or no!");
-                returnValues[2] = Console.ReadLine().ToLower() == "yes" ? "true" : "false";
+                returnValues[2] = Console.ReadLine().ToLower();
                 verificationPassed = returnValues[2] == "yes" || returnValues[2] == "no";
             }
             returnValues[2] = returnValues[2] == "yes" ? "true" : "false";
@@ -81,7 +81,7 @@ namespace c_sharp_client
             while (!verificationPassed)
             {
                 Console.WriteLine("Please type yes or no!");
-                executeAgain = Console.ReadLine().ToLower() == "yes" ? "true" : "false";
+                executeAgain = Console.ReadLine().ToLower();
                 verificationPassed = executeAgain == "yes" || executeAgain == "no";
             }
             executeAgain = executeAgain == "yes" ? "true" : "false";
@@ -96,7 +96,7 @@ namespace c_sharp_client
             {
                 Console.WriteLine("Please type yes or no!");
                 useNewParameters = Console.ReadLine().ToLower();
-                verificationPassed = useNewParameters == "yes" || useNewParameters == "no";
+                verificationPassed = useNewParameters;
             }
             useNewParameters = useNewParameters == "yes" ? "true" : "false";
 
@@ -132,7 +132,7 @@ namespace c_sharp_client
 
             while(true)
             {
-                dynamic client = null;
+                BaseClient client = null;
                 if (connectionType == "tcp")
                     client = new ClientTcp(address, port, blockSize, stopWait);
                 else
