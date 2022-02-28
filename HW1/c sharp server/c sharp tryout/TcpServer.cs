@@ -12,13 +12,13 @@ namespace c_sharp_server
     {
         private TcpListener server = null;
 
-        public TcpServer() 
+        public TcpServer()
         {
             Port = 13000;
             AddressString = "127.0.0.1";
             Address = IPAddress.Parse(AddressString);
             IsStopAndWait = false;
-            
+
             CreateServer();
         }
 
@@ -53,21 +53,22 @@ namespace c_sharp_server
             try
             {
                 server.Start();
-                string data = string.Empty, stopWaitMessage = string.Empty, okResponse = "ok";
+                string data = string.Empty, okResponse = "ok";
                 byte[] bytes = new byte[65535], okResponseBytes = Encoding.ASCII.GetBytes(okResponse);
                 int bytesCount;
                 bool endComm = false;
 
-                while(true)
+                while (true)
                 {
                     TcpClient client = server.AcceptTcpClient();
                     NetworkStream stream = client.GetStream();
+                    ResetCounters();
 
                     while ((bytesCount = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
-                        IncrementRead(bytes.Length);
+                        IncrementRead(bytesCount);
                         if (IsStopAndWait)
-                            stream.Write(okResponseBytes, 0, okResponseBytes.Length); 
+                            stream.Write(okResponseBytes, 0, okResponseBytes.Length);
 
                         data = Encoding.ASCII.GetString(bytes, 0, bytesCount);
                         if (data.Trim().ToLower() == "stop")
@@ -75,26 +76,9 @@ namespace c_sharp_server
                             endComm = true;
                             break;
                         }
-
-                        /* data = data.ToUpper();
-                        byte[] response = Encoding.ASCII.GetBytes(data);
-
-                        stream.Write(response, 0, response.Length);
-                        IncrementSent(response.Length);
-                        if (IsStopAndWait)
-                        {
-                            bytesCount = stream.Read(okResponseBytes, 0, okResponseBytes.Length);
-                            IncrementRead(okResponseBytes.Length);
-                            stopWaitMessage = Encoding.ASCII.GetString(okResponseBytes, 0, okResponseBytes.Length);
-                            if (stopWaitMessage.Trim() != okResponse)
-                            {
-                                Console.Write("There was an error while communicating with the client. No acknowledgement received");
-                                break;
-                            }
-                        }*/
                     }
 
-                    Console.WriteLine("Protocol used was: TCP \n Number of messages read: {1} \n Number of bytes read: {2}", this.GetReadMessages(), this.GetReadBytes());
+                    Console.WriteLine("Protocol used was: TCP \n Number of messages read: {0} \n Number of bytes read: {1}", this.GetReadMessages(), this.GetReadBytes());
                     client.Close();
 
                     if (endComm)

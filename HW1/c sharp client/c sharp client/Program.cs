@@ -14,7 +14,7 @@ namespace c_sharp_client
             Console.WriteLine("First enter the address you'd like to use:");
             returnValues[0] = Console.ReadLine();
             verificationPassed = IPAddress.TryParse(returnValues[0], out _);
-            while(!verificationPassed)
+            while (!verificationPassed)
             {
                 Console.WriteLine("Please enter a valid address!");
                 returnValues[0] = Console.ReadLine();
@@ -80,8 +80,8 @@ namespace c_sharp_client
                 verificationPassed = executeAgain == "yes" || executeAgain == "no";
             }
             executeAgain = executeAgain == "yes" ? "true" : "false";
-            if(executeAgain == "false")
-                return  new Tuple<bool, bool>(bool.Parse(executeAgain), false);
+            if (executeAgain == "false")
+                return new Tuple<bool, bool>(bool.Parse(executeAgain), false);
 
             Console.WriteLine("Do you want to change the parameters? You can only change the message size and the communication type.");
             Console.WriteLine("Answer with yes or no.");
@@ -90,7 +90,7 @@ namespace c_sharp_client
             while (!verificationPassed)
             {
                 Console.WriteLine("Please type yes or no!");
-                useNewParameters = Console.ReadLine().ToLower() == "yes" ? "true" : "false";
+                useNewParameters = Console.ReadLine().ToLower();
                 verificationPassed = useNewParameters == "yes" || useNewParameters == "no";
             }
             useNewParameters = useNewParameters == "yes" ? "true" : "false";
@@ -125,9 +125,9 @@ namespace c_sharp_client
             Console.WriteLine("Received as input {0} {1} {2} {3} {4}", userInput[0], userInput[1], userInput[2], userInput[3], userInput[4]);
             string connectionType = userInput[4], blockSize = userInput[3], stopWait = userInput[2], port = userInput[1], address = userInput[0];
 
-            while(true)
+            while (true)
             {
-                BaseClient client = null;
+                dynamic client = null;
                 if (connectionType == "tcp")
                     client = new ClientTcp(address, port, blockSize, stopWait);
                 else
@@ -136,9 +136,9 @@ namespace c_sharp_client
                 client.Connect();
 
                 Tuple<bool, bool> continueCommunication = HandleCommunicationEnded();
-                if(continueCommunication.Item1)
+                if (continueCommunication.Item1)
                 {
-                    if(continueCommunication.Item2)
+                    if (continueCommunication.Item2)
                     {
                         string[] newInput = HandleUserInputSecondary();
                         blockSize = newInput[0];

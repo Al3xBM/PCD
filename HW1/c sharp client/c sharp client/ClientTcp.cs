@@ -35,7 +35,7 @@ namespace c_sharp_client
 
                 StartCommunication();
             }
-            catch(SocketException e)
+            catch (SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
             }
@@ -48,33 +48,25 @@ namespace c_sharp_client
             try
             {
                 NetworkStream stream = client.GetStream();
-                FileStream fileHandle = File.OpenRead(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "name_basics.tsv"));
-                string stopWaitMessage = string.Empty, okResponse = "ok"; // , responseMessage;
-                byte[] data = new byte[BlockSize], response = new byte[BlockSize], okResponseBytes = Encoding.ASCII.GetBytes(okResponse);            
+                FileStream fileHandle = File.OpenRead(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "input.tsv"));
+                string stopWaitMessage = string.Empty, okResponse = "ok";
+                byte[] data = new byte[BlockSize], response = new byte[BlockSize];
                 int bytesRead, bytesCount;
 
-                while((bytesRead = fileHandle.Read(data, 0, BlockSize)) != 0)
+                while ((bytesRead = fileHandle.Read(data, 0, BlockSize)) != 0)
                 {
-                    stream.Write(data, 0, data.Length);
-                    IncrementSent(data.Length);
+                    stream.Write(data, 0, bytesRead);
+                    IncrementSent(bytesRead);
                     if (IsStopAndWait)
                     {
-                        bytesCount = stream.Read(okResponseBytes, 0, okResponseBytes.Length);
-                        stopWaitMessage = Encoding.ASCII.GetString(okResponseBytes, 0, okResponseBytes.Length);
+                        bytesCount = stream.Read(response, 0, response.Length);
+                        stopWaitMessage = Encoding.ASCII.GetString(response, 0, bytesCount);
                         if (stopWaitMessage.Trim() != okResponse)
                         {
                             Console.WriteLine("There was an error while communicating with the client. No acknowledgement received");
                             break;
                         }
                     }
-
-/*                    response = new byte[BlockSize];
-                    bytesCount = stream.Read(response, 0, response.Length);
-                    if (IsStopAndWait)
-                        stream.Write(okResponseBytes, 0, okResponseBytes.Length);
-
-                    responseMessage = Encoding.ASCII.GetString(response, 0, bytesCount);
-                    data = new byte[BlockSize];*/
                 }
 
                 stream.Close();
@@ -91,7 +83,7 @@ namespace c_sharp_client
             finally
             {
                 client.Close();
-                Console.WriteLine("Protocol used was: UDP \n Number of messages sent: {1} \n Number of bytes sent: {2} \n Time spent: {3}", this.GetSentMessages(), this.GetSentBytes(), stopWatch.ElapsedMilliseconds);
+                Console.WriteLine("Protocol used was: TCP \n Number of messages sent: {0} \n Number of bytes sent: {1} \n Time spent: {2} ms", this.GetSentMessages(), this.GetSentBytes(), stopWatch.ElapsedMilliseconds);
             }
         }
 
@@ -106,7 +98,7 @@ namespace c_sharp_client
                 stream.Write(data, 0, data.Length);
                 if (IsStopAndWait)
                     _ = stream.Read(data, 0, data.Length);
-                
+
                 stream.Close();
             }
             catch (SocketException e)
@@ -118,7 +110,7 @@ namespace c_sharp_client
                 Console.WriteLine("Exception: {0}", e);
             }
             finally
-            {         
+            {
                 client.Close();
             }
 

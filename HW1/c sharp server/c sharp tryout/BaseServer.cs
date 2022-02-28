@@ -19,7 +19,7 @@ namespace c_sharp_server
         protected abstract void CreateServer();
 
         public abstract void Communicate();
-        
+
         protected void IncrementRead(int bytes)
         {
             messagesRead += 1;
@@ -29,5 +29,11 @@ namespace c_sharp_server
         public uint GetReadMessages() => messagesRead;
 
         public uint GetReadBytes() => bytesRead;
+
+        protected void ResetCounters()
+        {
+            messagesRead = 0;
+            bytesRead = 0;
+        }
     }
 }

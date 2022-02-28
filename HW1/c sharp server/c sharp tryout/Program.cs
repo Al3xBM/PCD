@@ -85,7 +85,7 @@ namespace c_sharp_server
 
             while (true)
             {
-                BaseServer server = null;
+                dynamic server = null;
                 if (connectionType == "tcp")
                     server = new TcpServer(address, port, stopWait);
                 else
