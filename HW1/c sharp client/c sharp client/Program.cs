@@ -83,7 +83,7 @@ namespace c_sharp_client
             if (executeAgain == "false")
                 return new Tuple<bool, bool>(bool.Parse(executeAgain), false);
 
-            Console.WriteLine("Do you want to change the parameters? You can only change the message size and the communication type.");
+            Console.WriteLine("Do you want to change the size of the message?");
             Console.WriteLine("Answer with yes or no.");
             useNewParameters = Console.ReadLine().ToLower();
             verificationPassed = useNewParameters == "yes" || useNewParameters == "no";

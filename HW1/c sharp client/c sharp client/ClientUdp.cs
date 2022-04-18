@@ -80,7 +80,7 @@ namespace c_sharp_client
                 data = Encoding.ASCII.GetBytes("print");
                 client.SendTo(data, 0, data.Length, SocketFlags.None, serverEndpoint);
                 if (IsStopAndWait)
-                    _ = client.ReceiveFrom(data, 0, BlockSize, SocketFlags.None, ref serverEndpoint);
+                    _ = client.ReceiveFrom(data, 0, data.Length, SocketFlags.None, ref serverEndpoint);
             }
             catch (SocketException e)
             {
