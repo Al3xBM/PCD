@@ -1,0 +1,73 @@
+const TO_DO_TABLE = "todos";
+
+class TodoManagerService {
+
+    constructor(enclaveDB) {
+        this.enclave = enclaveDB;
+    }
+    
+    createToDo(todo, callback) {
+        console.log(this.enclave);
+        this.enclave.getHistory(TO_DO_TABLE, todo.input.name, (err, res) => {
+            if(err) {
+                this.enclave.insertRecord(TO_DO_TABLE, todo.input.name, callback);
+            } else {
+                this.enclave.updateRecord(TO_DO_TABLE, todo.input.name, todo, callback);
+            }
+        });
+    }
+
+    removeToDo(todo, index, callback) {
+        // this.enclave.deleteRecord(TO_DO_TABLE, todo.input.name, callback);
+
+        this.enclave.getAllRecords(TO_DO_TABLE, (undef, values) => {
+            console.log(values);
+        });
+
+        this.enclave.getAllRecords(TO_DO_TABLE, (undef, values) => {
+            if(values.length - 1 <= index)
+                return; 
+
+            this.enclave.updateRecord(TO_DO_TABLE, values[index].input.name, values[index + 1], () => {});
+            this.enclave.updateRecord(TO_DO_TABLE, values[index + 1].input.name, values[index], () => {});
+        });
+    
+        this.enclave.getAllRecords(TO_DO_TABLE, (undef, values) => {
+            console.log(values);
+        });
+
+    }
+
+    editToDo(todo, callback) {
+        this.enclave.updateRecord(TO_DO_TABLE, todo.input.name, todo, callback);
+    }
+
+    listToDos(callback) {
+        this.enclave.getAllRecords(TO_DO_TABLE, callback);
+    }
+}
+
+let todoManagerService;
+let getTodoManagerServiceInstance = function (controllerInstance, callback) {
+    if (!todoManagerService) {
+        // getMainEnclaveDB
+        // getBasicDB
+        // getInMemoryDB
+        // console.log(controllerInstance);
+        controllerInstance.getInMemoryDB((err, enclave) => {
+            if (err) {
+                console.log('Could not get main enclave ', err);
+                return callback(err);
+            }
+            todoManagerService = new TodoManagerService(enclave);
+            return callback(todoManagerService)
+        })
+
+    } else {
+        return callback(todoManagerService);
+    }
+}
+
+export {
+    getTodoManagerServiceInstance
+};
