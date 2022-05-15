@@ -1,0 +1,54 @@
+<link rel="stylesheet" href="assets/pages/home.css">
+<webc-container controller="TodoListController" class="todo-container">
+    <header>
+        <h2>TODO Application</h2>
+    </header>
+
+    <hr>
+
+    <!-- Filter items-->
+    <section class="addition">
+        <label for="@filterString.id">Filter your TODOs:</label>
+        <input data-view-model="@filterString" data-tag="filter-todo">
+    </section>
+
+    <!-- Adding items -->
+    <section class="addition">
+        <label for="@item.id">Create your TODO:</label>
+        <input data-view-model="@item" data-tag="create-todo">
+    </section>
+
+    <section data-tag="sort-buttons">
+        <label>
+            <input type="button" class="sort-button" id="sort-checkbox">
+        </label>
+        <label>
+            <input type="button" class="sort-button" id="sort-alphabetical">
+        </label>
+    </section>
+
+    <!-- Render each item from the model -->
+    <section class="todos" data-for="@items" data-tag="items">
+        <div class="todo">
+            <label>
+                <input type="checkbox" data-view-model="@checkbox">
+            </label>
+            <input type="text" data-view-model="@input">
+            <label>
+                <input type="button" data-view-model="@delete">
+            </label>
+        </div>
+
+        <div slot="no-data">{{ @no-data }}</div>
+    </section>
+
+    <hr>
+
+    <footer>
+        <strong>HINTs:</strong>
+        <ul>
+            <li tabindex="0">Save: Unfocus or press <code>Tab</code>!</li>
+            <li>Edit: double click on TODO!</li>
+        </ul>
+    </footer>
+</webc-container>
