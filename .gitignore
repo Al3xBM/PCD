@@ -5,6 +5,7 @@
 *.suo
 *.user
 *.sln.docstates
+external-volume/
 
 # Build results
 
