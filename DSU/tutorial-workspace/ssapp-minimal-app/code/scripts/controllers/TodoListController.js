@@ -37,6 +37,8 @@ export default class TodoListController extends WebcController {
             'no-data': 'There are no TODOs'
         };
 
+        this.sortAlphabetically = 0;
+        this.sortCheckbox = 0;
     }
 
     initListeners = () => {
@@ -52,7 +54,7 @@ export default class TodoListController extends WebcController {
         const itemsElement = this.getElementByTag('items');
         if (itemsElement) {
             itemsElement.addEventListener("focusout", this._blurHandler)
-            itemsElement.addEventListener("click", this._changeToDoCheckedState)
+            itemsElement.addEventListener("click", this._ToDoClickHandler)
             itemsElement.addEventListener("dblclick", this._doubleClickHandler)
         }
 
@@ -65,6 +67,7 @@ export default class TodoListController extends WebcController {
         if(sortElement) {
             sortElement.addEventListener('click', this._toggleSortHandler);
         }
+
     }
 
     _filterHandler = (event) => {
@@ -149,28 +152,58 @@ export default class TodoListController extends WebcController {
     }
 
     _toggleSortHandler = (event) => {
-        // console.log(event);
-        
-        if(event.target.classList.contains('sort-button')){
+        console.log(event);
+        console.log(this);
+        let buttonEl = undefined;
+
+        if(event.path.some(x => x.classList && x.classList.contains('sort-button'))) {
+            buttonEl = event.path.find(x => x.classList.contains('sort-button'));
+        } 
+        else if(event.target.classList.contains('sort-button')) {
             event.target.classList.toggle('sort-toggle');
-            this.populateItemList((err, data) => {
-                if (err) {
-                    return this._handleError(err);
-                } else {
-                    this.setItemsClean(data);
-                }
-            });
         }
+
+        let neutral = buttonEl.querySelector('.sort-none-label');
+        let ascending = buttonEl.querySelector('.sort-up-label');
+        let descending = buttonEl.querySelector('.sort-down-label');
+        let hiddenClass = 'hidden-sort-direction';
+        let sortDirection = 0;
+
+        if(!neutral.classList.contains(hiddenClass)) {
+            neutral.classList.toggle(hiddenClass);
+            descending.classList.toggle(hiddenClass);
+            sortDirection = 1;
+        }
+        else if(!descending.classList.contains(hiddenClass)) {
+            descending.classList.toggle(hiddenClass);
+            ascending.classList.toggle(hiddenClass);
+            sortDirection = -1;
+        }
+        else {
+            ascending.classList.toggle(hiddenClass);
+            neutral.classList.toggle(hiddenClass);
+        }
+
+        if(buttonEl.id == 'sort-alphabetically')
+            this.sortAlphabetically = sortDirection;
+        else if (buttonEl.id == 'sort-checkbox')
+            this.sortCheckbox = sortDirection;
+
+        this.populateItemList((err, data) => {
+            if (err) {
+                return this._handleError(err);
+            } else {
+                this.setItemsClean(data);
+            }
+        });
     }
 
     changeReadOnlyPropertyFromEventItem = (event, readOnly) => {
         let elementName = event.target.name;
-        // If the element that triggered the event was not a todo-input we ignore it
         if (!elementName || !elementName.includes('todo-input')) {
             return;
         }
 
-        // Find the wanted element and change the value of the read-only property
         let items = this.model.items
         let itemIndex = items.findIndex((todo) => todo.input.name === elementName)
         items[itemIndex].input = {
@@ -181,20 +214,14 @@ export default class TodoListController extends WebcController {
         return items[itemIndex];
     }
 
-    _changeToDoCheckedState = (event) => {
-        let elementName = event.target.name;
-        // If the element that triggered the event was not a todo-checkbox we ignore it
-
-        console.log(elementName + '----');
-        
+    _ToDoClickHandler = (event) => {
+        let elementName = event.target.name;      
         if (!elementName || (!elementName.includes('todo-checkbox') && !elementName.includes('todo-delete'))) {
             return;
         }
 
-        // Find the wanted element
         let items = this.model.items;
 
-        // Change the value of the checked property
         if(elementName.includes('todo-checkbox')){
             let itemIndex = items.findIndex((todo) => todo.checkbox.name === event.target.name)
             items[itemIndex].checkbox = {
@@ -205,11 +232,11 @@ export default class TodoListController extends WebcController {
             this.editListItem(items[itemIndex]);
         }
 
+        console.log(event);
         if(elementName.includes('todo-delete'))
         {
             this.setItemsClean(items);
             let itemIndex = items.findIndex((todo) => {
-                // console.log(todo); 
                 return todo.delete.name === event.target.name}
             );
 
@@ -236,12 +263,11 @@ export default class TodoListController extends WebcController {
 
     setItemsClean = (newItems) => {
         if (newItems) {
-            // Set the model fresh, without proxies
             this.model.items = JSON.parse(JSON.stringify(newItems));
             this.model.items = this.model.items.filter((item) => !item.__deleted).sort((a,b) => new Date(a.date) - new Date(b.date));
+            
             this.model.items.forEach(x => {
                 let indexUI = this.model.items.indexOf(x);
-                    // x.pk.substr(x.pk.length - 1);
                 x.input.name = x.input.name.slice(0, -1) + indexUI;
                 x.delete.name = x.delete.name.slice(0, -1) + indexUI;
                 x.checkbox.name = x.checkbox.name.slice(0, -1) + indexUI;
@@ -249,28 +275,45 @@ export default class TodoListController extends WebcController {
 
             console.log(this.model.items);
 
-            var sortToggles = Array.from(this.getElementByTag('sort-buttons').getElementsByClassName('sort-toggle'));
-            var sortCheckbox = sortToggles.some(x => x.id == 'sort-checkbox');
-            var sortAlphabetically = sortToggles.some(x => x.id == 'sort-alphabetical');
-
-            if(sortCheckbox)
+            if(this.sortCheckbox == 1)
             {
-                if(sortAlphabetically)
+                if(this.sortAlphabetically == 1)
                     this.model.items = this.model.items.sort((a, b) => 
-                        ((a.checkbox.checked === b.checkbox.checked)? 0 : a.checkbox.checked? -1 : 1) || a.input.value.localeCompare(b.input.value)
-                    );
-                else
+                        ((a.checkbox.checked === b.checkbox.checked)? 0 : a.checkbox.checked? -1 : 1) || a.input.value.localeCompare(b.input.value));
+                else if(this.sortAlphabetically == -1)
+                    this.model.items = this.model.items.sort((a, b) => 
+                        ((a.checkbox.checked === b.checkbox.checked)? 0 : a.checkbox.checked? -1 : 1) || b.input.value.localeCompare(a.input.value));
+                else 
                     this.model.items = this.model.items.sort((a, b) => (a.checkbox.checked === b.checkbox.checked)? 0 : a.checkbox.checked? -1 : 1);
             }
-            else if(sortAlphabetically)
-                this.model.items = this.model.items.sort((a, b) => a.input.value.localeCompare(b.input.value));
-        } else {
+            else if(this.sortCheckbox == -1)
+            {
+                if(this.sortAlphabetically == 1)
+                    this.model.items = this.model.items.sort((a, b) => 
+                        ((b.checkbox.checked === a.checkbox.checked)? 0 : b.checkbox.checked? -1 : 1) || a.input.value.localeCompare(b.input.value));
+                else if(this.sortAlphabetically == -1)
+                    this.model.items = this.model.items.sort((a, b) => 
+                        ((b.checkbox.checked === a.checkbox.checked)? 0 : b.checkbox.checked? -1 : 1) || b.input.value.localeCompare(a.input.value));
+                else 
+                    this.model.items = this.model.items.sort((a, b) => (b.checkbox.checked === a.checkbox.checked)? 0 : b.checkbox.checked? -1 : 1);
+            }
+            else if(this.sortCheckbox == 0)
+            {
+                if(this.sortAlphabetically == 1)
+                    this.model.items = this.model.items.sort((a, b) => 
+                        a.input.value.localeCompare(b.input.value));
+                else if(this.sortAlphabetically == -1)
+                    this.model.items = this.model.items.sort((a, b) => 
+                        b.input.value.localeCompare(a.input.value));
+            }
+        } 
+        else 
+        {
             this.model.items = [];
         }
     }
 
     deleteListItem(todo) {
-        console.log('inside controller - deleteListItem -----');
         this.TodoManagerService.removeToDo(todo, (err, data) => {
             if(err) {
                 return this._handleError(err);

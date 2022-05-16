@@ -26,7 +26,7 @@
     padding: 1rem;
     border-radius: 2px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
-    margin-bottom: 1rem;
+    margin: 1rem;
 }
 .todo-container .addition label {
     margin-bottom: 0;
@@ -78,4 +78,54 @@
 
 .sort-toggle {
     background-color: red;
+}
+
+.textbox-section {
+    display: flex;
+}
+
+.delete-button {
+    background-color: inherit;
+    border: none;
+}
+
+.sort-section {
+    display: flex;
+    justify-content: center;
+}
+
+.sort-button-label {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.sort-icon-label {
+    padding-left: 0.3rem;
+}
+
+.sort-button {
+    padding: 0.3rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.icon-container {
+    display: flex;
+}
+
+.bi-trash {
+    fill: white;
+}
+
+.sort-direction {
+    padding-left: 1.5rem;
+    padding-right: 0.5rem;
+}
+
+.sort-button-icon {
+    transform: scale(1.5);
+}
+
+.hidden-sort-direction {
+    display: none;
 }
