@@ -129,3 +129,23 @@
 .hidden-sort-direction {
     display: none;
 }
+
+.export-import-icon {
+    transform: scaleX(1.5) scaleY(1.1);
+}
+
+.export-import-button {
+    padding: 0.3rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.import-export-section {
+    display: flex;
+    justify-content: center;
+}
+
+.higher-section {
+    display: flex;
+    justify-content: center;
+}

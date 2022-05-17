@@ -42,15 +42,11 @@ export default class TodoListController extends WebcController {
     }
 
     initListeners = () => {
-        // Select the creating field and add
-        // focusout event listener
-        // This is used for creating new todo elements
         const todoCreatorElement = this.getElementByTag('create-todo');
         if (todoCreatorElement) {
             todoCreatorElement.addEventListener("focusout", this._mainInputBlurHandler);
         }
 
-        // Selecting the parent of all the items and add the event listeners
         const itemsElement = this.getElementByTag('items');
         if (itemsElement) {
             itemsElement.addEventListener("focusout", this._blurHandler)
@@ -68,6 +64,20 @@ export default class TodoListController extends WebcController {
             sortElement.addEventListener('click', this._toggleSortHandler);
         }
 
+        const importElement = this.getElementByTag('import-button');
+        if(importElement) {
+            importElement.addEventListener('click', this._importHandler);
+        }
+
+        const importElement2 = this.getElementByTag('file-input');
+        if(importElement2) {
+            importElement2.addEventListener('change', this._uploadHandler)
+        }
+
+        const exportElement = this.getElementByTag('export-button');
+        if(exportElement) {
+            exportElement.addEventListener('click', this._exportHandler);
+        }
     }
 
     _filterHandler = (event) => {
@@ -126,6 +136,8 @@ export default class TodoListController extends WebcController {
 
             // Clear the "item" view model
             this.model.item.value = '';
+
+            this.setItemsClean(this.model.items);
         });
     }
 
@@ -151,16 +163,68 @@ export default class TodoListController extends WebcController {
         this.changeReadOnlyPropertyFromEventItem(event, false);
     }
 
+    _uploadHandler = (event) => {
+        let uploadedFile = event.target.files[0];
+        let fileReader = new FileReader();
+        fileReader.onload = event => {
+            let copyItems = this.model.items;
+            copyItems.forEach(item => {
+                this.deleteListItem(item);
+            });
+            copyItems = JSON.parse(event.target.result);
+            copyItems.forEach(item => this.editListItem(item));
+
+            let recFun = (items, index) => {
+                if(items.length - 1 > index)
+                    this.TodoManagerService.createToDo(items[index], (err, data) => {
+                        this.model.items.push(items[index]);
+                        recFun(items, index + 1);
+                    });
+                else
+                    this.populateItemList((err, data) => {
+                        if (err) {
+                            return this._handleError(err);
+                        } else {
+                            this.setItemsClean(data);
+                        }
+                    });
+            }
+            setTimeout(recFun(copyItems), 5000);
+
+
+        };
+        fileReader.onerror = error => console.log(error);
+        fileReader.readAsText(uploadedFile)
+    }
+
+    _importHandler = (event) => {
+        let fileInputElement = document.getElementById('file-input');
+        fileInputElement.click();
+    }
+
+    _exportHandler = (event) => {
+        let jsonData = JSON.stringify(this.model.items);
+        let dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(jsonData);
+
+        let exportFileDefaultName = 'toDos.json';
+    
+        let linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    }
+
     _toggleSortHandler = (event) => {
-        console.log(event);
-        console.log(this);
         let buttonEl = undefined;
 
         if(event.path.some(x => x.classList && x.classList.contains('sort-button'))) {
             buttonEl = event.path.find(x => x.classList.contains('sort-button'));
         } 
         else if(event.target.classList.contains('sort-button')) {
-            event.target.classList.toggle('sort-toggle');
+            buttonEl = event.target;
+        }
+        else {
+            return;
         }
 
         let neutral = buttonEl.querySelector('.sort-none-label');
@@ -228,8 +292,8 @@ export default class TodoListController extends WebcController {
                 ...items[itemIndex].checkbox,
                 checked: !items[itemIndex].checkbox.checked,
             }
-            this.setItemsClean(items);
             this.editListItem(items[itemIndex]);
+            setTimeout(this.setItemsClean(items), 3000);
         }
 
         console.log(event);
@@ -237,11 +301,11 @@ export default class TodoListController extends WebcController {
         {
             this.setItemsClean(items);
             let itemIndex = items.findIndex((todo) => {
-                return todo.delete.name === event.target.name}
-            );
+                return todo.delete.name === event.target.name
+            });
 
             this.deleteListItem(items[itemIndex]);
-            this.setItemsClean(items);
+            setTimeout(this.setItemsClean(items), 3000);
         }
     }
 
@@ -311,6 +375,8 @@ export default class TodoListController extends WebcController {
         {
             this.model.items = [];
         }
+
+        setTimeout(() => {}, 1000);
     }
 
     deleteListItem(todo) {
